@@ -24,13 +24,12 @@ class TransitionalServiceProcessor(
         }
     }
 
-    var invoked = false
+    private var invoked = false
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (invoked) {
             return emptyList()
         }
 
-        //file = codeGenerator.createNewFile(Dependencies(false), "", "transitional-service-manifest", "yaml")
         file = codeGenerator.createNewFile(Dependencies(false), "com.braveinnov", "HelloKSP")
         file.write("""
             package com.braveinnov
@@ -47,8 +46,6 @@ class TransitionalServiceProcessor(
 
                 // Log or use the namespace value as needed
                 logger.info("Found @TransitionalService with namespace: $namespace on ${classDeclaration.qualifiedName?.asString()}")
-
-                // Here, you could generate code or perform other processing based on the classDeclaration and its annotation
             }
 
         invoked = true

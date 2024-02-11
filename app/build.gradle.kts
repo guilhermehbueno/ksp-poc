@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.cli.jvm.main
 
 plugins {
     kotlin("jvm")
-    id("com.google.devtools.ksp") version "1.6.20-1.0.5"
+    id("com.google.devtools.ksp")
     id("org.springframework.boot").version("2.7.8")
     application
 }
@@ -12,7 +12,7 @@ configurations {
     create("customKotlinCompiler") {
         extendsFrom(configurations.implementation.get())
         defaultDependencies {
-            val kotlinVersion = "1.6.21"
+            val kotlinVersion = properties["kotlinVersion"]
             add(project.dependencies.create("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion"))
             add(project.dependencies.create("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"))
         }
@@ -30,12 +30,12 @@ dependencies {
     implementation(project(":annotation"))
     implementation(kotlin("stdlib-jdk8"))
 
-    val kotlinVersion = "1.6.21" // adjust the version as needed
+    val kotlinVersion = properties["kotlinVersion"]
     add("customKotlinCompiler", "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     add("customKotlinCompiler", "org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     add("customKotlinCompiler", "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     add("customKotlinCompiler", "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
-//    ksp(project(":processor"))
+    ksp(project(":processor"))
 }
 
 testing {
@@ -50,9 +50,13 @@ application {
     mainClass.set("com.braveinnov.AppKt")
 }
 
+/**
+ * Including the generated folder in the source list.
+ * This way it will be included in the final jar.
+ */
 kotlin.sourceSets.main {
     kotlin.srcDirs(
-//        file("$buildDir/generated/ksp/main/kotlin"),
+        file("$buildDir/generated/ksp/main/kotlin"),
         file("$buildDir/generated/tg/main/kotlin")
     )
 }
@@ -63,14 +67,25 @@ tasks.clean {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        incremental = true
+        incremental = false //Heads up! It makes the KSP fail when true.
     }
 }
 
+/**
+ * Defining the bootJar task depends on the compileKotlinManually.
+ * This way the jar will be packed after the generated classes compile and will include it in the
+ * final package..
+ */
 tasks.named("bootJar") {
     dependsOn("compileKotlinManually")
 }
 
+/**
+ * Task responsible for compiling the generated files manually.
+ * I tried different approaches before ending with it.
+ *
+ * It's working perfectly.
+ */
 tasks.register<JavaExec>("compileKotlinManually") {
     mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
     classpath = configurations.getByName("customKotlinCompiler")
@@ -89,6 +104,14 @@ tasks.register<JavaExec>("compileKotlinManually") {
     dependsOn("runScriptAndGenerateFiles")
 }
 
+/**
+ * Task responsible for calling the Reflector.
+ *
+ * In my final project the Reflector will be responsible for identify
+ * all the classes with the @TransitionalService annotation and invoke
+ * all the methods with the @TransitionalTypes. It will generate new files
+ * based on the method returns.
+ */
 tasks.register<JavaExec>("runScriptAndGenerateFiles"){
     main = "com.braveinnov.Reflector"
     classpath = files(sourceSets.main.get().runtimeClasspath)

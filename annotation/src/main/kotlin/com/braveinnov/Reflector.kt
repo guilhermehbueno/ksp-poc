@@ -4,7 +4,14 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.reflect.KClass
 
+/**
+ * Class responsible for invoking a class method using Reflection.
+ * At the end it should generate files based on the method return.
+ *
+ * @see com.braveinnov.AppController
+ */
 object Reflector {
     @JvmStatic
     fun main(args: Array<String>) {
@@ -15,19 +22,22 @@ object Reflector {
         val method = clazz.getDeclaredMethod(methodName)
         val instance = clazz.getDeclaredConstructor().newInstance()
 
-        method.invoke(instance)
+        val types = method.invoke(instance) as Map<String, Any>
 
-
-        // Define the output directory
         val outputDir = File("build/generated/tg/main/kotlin/com/example")
         outputDir.mkdirs() // Ensure the directory exists
 
-        val fos = FileOutputStream("build/generated/tg/main/kotlin/com/example/HelloWorld.kt")
+        val fos = FileOutputStream("build/generated/tg/main/kotlin/com/example/${types.keys.first()}.kt")
+
+        /**
+         * We can create the file using the Kotlin Poet.
+         * Following is a simple example
+         */
         fos.write("""
             package com.example
 
-            class HelloWorld {
-                fun someLibraryMethod(): Boolean {
+            class ${types.keys.first()} {
+                fun someMethod(): Boolean {
                     return true
                 }
             }
