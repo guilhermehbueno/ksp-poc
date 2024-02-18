@@ -1,14 +1,25 @@
-package com.braveinnov
+package com.braveinnov.controller
 
+import com.braveinnov.TransitionalService
+import com.braveinnov.TransitionalTypes
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.config.annotation.EnableWebMvc
+
 
 /**
  *
  */
-@RestController
+@Controller
+@EnableWebMvc
 @TransitionalService(namespace = "search")
-class AppController {
+class AppController (){
+
+    init {
+        println("Loading AppController...")
+    }
 
     /**
      * @see com.braveinnov.Reflector
@@ -27,12 +38,10 @@ class AppController {
         return mapOf<String, Any>("HelloItShouldBeIncludedInTheFinalJar" to mapOf<String, Any>( "string" to listOf<String>("name", "description")))
     }
 
-    @GetMapping(name = "/hello")
-    fun sayHi(request: Request): Response {
-        HelloKSP()
-        return Response(200, "Success")
+    @GetMapping("/hello")
+    fun sayHi(): ResponseEntity<String> {
+        return ResponseEntity.ok("Success")
     }
 }
-
 class Request (val name: String){}
 class Response(val status: Int, val message: String) {}

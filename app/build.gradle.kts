@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm")
     id("com.google.devtools.ksp")
     id("org.springframework.boot").version("2.7.8")
+    kotlin("plugin.spring") version "1.6.10"
     application
 }
 
