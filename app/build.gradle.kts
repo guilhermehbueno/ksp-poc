@@ -116,7 +116,7 @@ tasks.register<JavaExec>("compileKotlinManually") {
 tasks.register<JavaExec>("runScriptAndGenerateFiles"){
     main = "com.braveinnov.Reflector"
     classpath = files(sourceSets.main.get().runtimeClasspath)
-    args("com.braveinnov.AppController", "definedTypes")
+    args("com.braveinnov.controller.AppController", "definedTypes")
     outputs.upToDateWhen { false }
     outputs.dir("$buildDir/generated/tg/main/kotlin")
 }
