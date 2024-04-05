@@ -6,13 +6,13 @@ package com.braveinnov
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
-@SpringBootApplication
+`@SpringBootApplication
 class App {
     val greeting: String
         get() {
             return "Hello World!"
         }
-}
+}`
 
 fun main(vararg args: String) {
     SpringApplication.run(App::class.java, *args)
